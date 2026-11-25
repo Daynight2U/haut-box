@@ -1,0 +1,34 @@
+name: haut_box
+description: "河南工业大学校园助手 —— 课表 / 考试 / 成绩 / 校园网自动认证"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 本地键值存储（偏好、缓存快照）
+  shared_preferences: ^2.3.3
+  # 会话令牌加密存储（不存密码）
+  flutter_secure_storage: ^9.2.4
+  # 日期/周次格式化
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+# 新的 shared_preferences_android / path_provider_android 改用 jni（Dart FFI），
+# 编译时强制要求 NDK + CMake（1GB 起步）。本项目不需要原生代码，
+# 所以把这两个插件钉在还在用 Java/Kotlin 实现的版本上。
+# 以后要升级：装好 NDK + CMake 后删掉这一段即可。
+dependency_overrides:
+  shared_preferences_android: 2.4.28
+  path_provider_android: 2.2.23
+
+flutter:
+  uses-material-design: true

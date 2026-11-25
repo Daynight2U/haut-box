@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp">
+
+    <TextView
+        android:id="@+id/rowTime"
+        android:layout_width="58dp"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textSize="10sp"
+        android:textColor="#8A93A8"
+        android:text="14:30" />
+
+    <TextView
+        android:id="@+id/rowName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textSize="11.5sp"
+        android:textColor="#E8EDF8"
+        android:text="数据结构" />
+
+    <TextView
+        android:id="@+id/rowRoom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:maxWidth="70dp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textSize="10sp"
+        android:textColor="#8A93A8"
+        android:text="莲4-214" />
+</LinearLayout>

@@ -1,0 +1,15 @@
+# 统一换行符，避免 Windows 提交把整个仓库刷成 CRLF
+* text=auto eol=lf
+
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+gradlew text eol=lf
+
+*.png   binary
+*.jpg   binary
+*.webp  binary
+*.jar   binary
+*.apk   binary
+*.aab   binary
+*.keystore binary
+*.jks   binary
