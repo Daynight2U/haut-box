@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/app_state.dart';
 import '../../core/constants.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/wifi/wifi_channel.dart';
 import '../../ui/glass/glass.dart';
 import '../settings/period_page.dart';
 import '../wifi/wifi_page.dart';
@@ -76,6 +77,17 @@ class MorePage extends StatelessWidget {
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const PeriodPage()),
                     ),
+                  ),
+                  Divider(height: 1, indent: 50, endIndent: 16, color: g.border.withValues(alpha: .5)),
+                  _SwitchRow(
+                    icon: Icons.notifications_active_outlined,
+                    title: '课前提醒',
+                    subtitle: '上课前 12 分钟通知，离线也能响',
+                    value: s.classRemind,
+                    onChanged: (v) async {
+                      if (v) await WifiChannel.requestNotificationPermission();
+                      await s.setClassRemind(v);
+                    },
                   ),
                   Divider(height: 1, indent: 50, endIndent: 16, color: g.border.withValues(alpha: .5)),
                   _NavRow(
@@ -396,4 +408,47 @@ void _showWidgetHelp(BuildContext context) {
       ),
     ),
   );
+}
+
+class _SwitchRow extends StatelessWidget {
+  const _SwitchRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final g = GlassTheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 10, 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: g.textSecondary),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 6),
+                Text(title, style: TextStyle(fontSize: 14.5, color: g.textPrimary)),
+                const SizedBox(height: 2),
+                Text(subtitle, style: TextStyle(fontSize: 11.5, color: g.textTertiary)),
+                const SizedBox(height: 6),
+              ],
+            ),
+          ),
+          Switch(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
 }

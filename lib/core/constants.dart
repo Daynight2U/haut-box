@@ -1,5 +1,5 @@
 /// 版本号（与 pubspec.yaml 保持一致，安装时系统显示的就是那个）
-const String kAppVersion = '1.0.0';
+const String kAppVersion = '1.1.0';
 
 /// 作息时间表。
 ///

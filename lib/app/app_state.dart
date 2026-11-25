@@ -72,6 +72,9 @@ class AppState extends ChangeNotifier {
   /// 作息时间（可编辑），小组件倒计时用
   List<(String, String)> periods = List.of(PeriodTimes.defaults);
 
+  /// 课前提醒（原生排闹钟）
+  bool classRemind = true;
+
   String? _hydratedKey;
 
   bool get ready => _prefs != null;
@@ -117,6 +120,7 @@ class AppState extends ChangeNotifier {
     studentName = _prefs!.getString('studentName');
     studentId = _prefs!.getString('studentId');
     periods = _loadPeriods();
+    classRemind = _prefs!.getBool('classRemind') ?? true;
 
     await _restoreSession();
     if (loggedIn) {
@@ -126,6 +130,8 @@ class AppState extends ChangeNotifier {
       notifyListeners();
       // 再按 TTL 决定是否后台补
       unawaited(refreshAll(silent: true));
+      // 把提醒开关同步给原生（装完第一次打开时）
+      unawaited(WidgetBridge.setReminders(classRemind));
     }
     notifyListeners();
   }
@@ -147,8 +153,15 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> setPeriod(int index, String start, String end) async {
-    if (index < 0 || index >= periods.length) return;
+  /// 课前提醒开关
+  Future<void> setClassRemind(bool on) async {
+    classRemind = on;
+    await _prefs?.setBool('classRemind', on);
+    notifyListeners();
+    await WidgetBridge.setReminders(on);
+  }
+
+  Future<void> setPeriod(int index, String start, String end) async {    if (index < 0 || index >= periods.length) return;
     final list = List.of(periods);
     list[index] = (start, end);
     periods = list;
@@ -166,6 +179,7 @@ class AppState extends ChangeNotifier {
     final d = schedule;
     final t = activeTerm;
     if (d == null || t == null) return;
+    if (t.key != TermCalendar.currentTerm().key) return;
     final start = TermCalendar.startOf(t).$1;
     final payload = {
       'student': d.student.name ?? '',
@@ -323,7 +337,9 @@ class AppState extends ChangeNotifier {
   }
 
   void _applySchedule(ScheduleData d, Term t) {
-    final week = TermCalendar.weekOf(t);
+    // 只有当前学期才有"现在第几周"；翻往年课表时别算出个荒唐的周数
+    final isCurrent = t.key == TermCalendar.currentTerm().key;
+    final week = isCurrent ? TermCalendar.weekOf(t) : null;
     final (start, totalWeeks) = TermCalendar.startOf(t);
     schedule = ScheduleData(
       student: d.student.copyWith(
@@ -337,8 +353,9 @@ class AppState extends ChangeNotifier {
     );
     studentName = schedule!.student.name ?? studentName;
     _prefs?.setString('studentName', studentName ?? '');
-    // 课表一变就把快照推给桌面组件
-    unawaited(pushWidgetSnapshot());
+    // 课表一变就把快照推给桌面组件；但往年课表不能顶掉当前学期的快照，
+    // 否则小组件和课前提醒会去提醒上学期的课
+    if (isCurrent) unawaited(pushWidgetSnapshot());
   }
 
   static int _byExamTime(ExamItem a, ExamItem b) {
@@ -452,6 +469,7 @@ class AppState extends ChangeNotifier {
       final r = await api.fetchGrades(xnm: t.xnm, xqm: t.xqm);
       await _cache!.put('grade', t.key, r.raw);
       _setGrades(t, r.data);
+      _maybeNotifyGrades(t, r.data);
     } on ZfException catch (e) {
       // 网络挂了：有缓存就用缓存，别把已有内容清空
       final c = _cache!.get('grade', t.key);
@@ -475,6 +493,35 @@ class AppState extends ChangeNotifier {
   void _setGrades(Term t, List<GradeItem> list) {
     gradesByTerm[t.key] = list;
     if (t.key == activeTerm?.key) grades = list;
+  }
+
+  /// 发现新课就把「出分了」推到通知栏。只对本学期提示，避免翻旧成绩时误报。
+  void _maybeNotifyGrades(Term t, List<GradeItem> list) {
+    if (t.key != activeTerm?.key) return;
+    final key = 'gradeSeen::${t.key}';
+    final seen = (_prefs?.getStringList(key) ?? const <String>[]).toSet();
+    final now = list.map((g) => '${g.name}|${g.score ?? ''}').toSet();
+    if (now.isEmpty) return;
+
+    // 首次同步不提示，只记下来
+    if (seen.isEmpty) {
+      _prefs?.setStringList(key, now.toList());
+      return;
+    }
+
+    final fresh = now.difference(seen);
+    if (fresh.isNotEmpty) {
+      final parts = fresh.first.split('|');
+      final name = parts.first;
+      final score = parts.length > 1 ? parts[1] : '';
+      WidgetBridge.notifyGrade(
+        title: fresh.length == 1 ? '出分了：$name $score' : '新增 ${fresh.length} 门成绩',
+        text: fresh.length == 1
+            ? '${t.displayLabel} · 点开看详情'
+            : fresh.map((e) => e.split('|').first).take(3).join('、'),
+      );
+    }
+    _prefs?.setStringList(key, now.toList());
   }
 
   /// 可选学期：当前学期 + 往年（按学年倒序，最多 8 个）

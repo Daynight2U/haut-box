@@ -72,7 +72,10 @@ class WidgetTickReceiver : BroadcastReceiver() {
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_DATE_CHANGED,
-            -> WidgetRenderer.updateAll(context)
+            -> {
+                WidgetRenderer.updateAll(context)
+                ClassReminder.reschedule(context)
+            }
         }
     }
 }

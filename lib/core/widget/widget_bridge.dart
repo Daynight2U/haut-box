@@ -22,4 +22,18 @@ class WidgetBridge {
       await _ch.invokeMethod('refresh');
     } catch (_) {}
   }
+
+  /// 课前提醒开关（原生侧排闹钟）
+  static Future<void> setReminders(bool on) async {
+    try {
+      await _ch.invokeMethod('setReminders', {'enabled': on});
+    } catch (_) {}
+  }
+
+  /// 出分提醒
+  static Future<void> notifyGrade({required String title, required String text}) async {
+    try {
+      await _ch.invokeMethod('notifyGrade', {'title': title, 'text': text});
+    } catch (_) {}
+  }
 }

@@ -31,8 +31,27 @@ class MainActivity : FlutterActivity() {
                         } else {
                             cn.edu.haut.hautbox.widget.WidgetData.save(this, json)
                             cn.edu.haut.hautbox.widget.WidgetRenderer.updateAll(this)
+                            // 课表一变，课前提醒也重排一遍
+                            cn.edu.haut.hautbox.widget.ClassReminder.reschedule(this)
                             result.success(true)
                         }
+                    }
+
+                    "setReminders" -> {
+                        val on = call.argument<Boolean>("enabled") ?: true
+                        cn.edu.haut.hautbox.widget.ClassReminder.setEnabled(this, on)
+                        result.success(on)
+                    }
+
+                    "remindersEnabled" -> result.success(
+                        cn.edu.haut.hautbox.widget.ClassReminder.enabled(this)
+                    )
+
+                    "notifyGrade" -> {
+                        val title = call.argument<String>("title") ?: "成绩更新"
+                        val text = call.argument<String>("text") ?: ""
+                        cn.edu.haut.hautbox.widget.ClassReminder.notifyGrade(this, title, text)
+                        result.success(true)
                     }
 
                     "refresh" -> {

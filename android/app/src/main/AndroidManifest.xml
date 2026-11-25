@@ -102,6 +102,15 @@
                 <action android:name="cn.edu.haut.hautbox.WIDGET_TICK" />
             </intent-filter>
         </receiver>
+
+        <!-- 课前提醒 -->
+        <receiver
+            android:name=".widget.ReminderReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="cn.edu.haut.hautbox.CLASS_REMIND" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <queries>
