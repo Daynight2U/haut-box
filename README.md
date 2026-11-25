@@ -39,6 +39,16 @@ HAUT BOX 把这些事一次性做完，顺手给你放一个「下一节课」�
 
 到 [Releases](https://github.com/Daynight2U/haut-box/releases) 下载最新 APK 直接安装。
 
+| 包 | 体积 | 给谁用 |
+|---|---|---|
+| `arm64-v8a` | **17 MB** | 绝大多数手机（2017 年后基本都是） |
+| `armeabi-v7a` | 15 MB | 老 32 位机型 |
+| `universal` | 49 MB | 不确定架构时兜底 |
+
+> 体积差在哪：`universal` 把三个 CPU 架构的 Flutter 引擎各塞了一份，98% 的体积是引擎，
+> 业务代码只有 5 MB。不确定就装 universal，确定就装 arm64。
+
+
 - 需要 Android 8.0（API 26）及以上
 - 首次登录：学号 + **教务系统密码**（不是统一认证密码）
 - Release 包用调试证书签名，仅用于个人安装，不用于上架
