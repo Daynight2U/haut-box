@@ -29,6 +29,13 @@ jobs:
       - name: 依赖
         run: flutter pub get
 
+      # gradle.properties 里关了构建期自动下载 SDK，这里显式补齐
+      - name: Android SDK 组件
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "platforms;android-34" "platforms;android-36" "build-tools;36.0.0"
+
       - name: 单元测试
         run: flutter test
 
